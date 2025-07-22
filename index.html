@@ -2,41 +2,77 @@
 <html lang="es">
 <head>
 	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<title>Batalla Formato con Réplica</title>
 	<style>
-		body {
+		/* Estilos generales para simular app móvil */
+		html, body {
+			margin: 0;
+			padding: 0;
 			background: #000;
 			color: #fff;
 			font-family: Arial, sans-serif;
-			padding: 20px;
+			-webkit-user-select: none; /* no seleccionar texto accidentalmente */
+			-ms-user-select: none;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent; /* quitar highlight en toque */
+			height: 100vh;
+			overflow-x: hidden;
+		}
+		body {
+			padding: 10px 5px;
+			-webkit-touch-callout: none; /* quitar menú contexto */
 		}
 		h1 {
 			text-align: center;
-			margin-bottom: 20px;
+			margin: 10px 0 20px 0;
+			font-size: 1.6rem;
 		}
 		table {
 			width: 100%;
 			border-collapse: collapse;
 			table-layout: fixed;
+			font-size: 0.85rem;
 		}
 		th, td {
 			border: 1px solid #555;
-			padding: 8px;
+			padding: 6px 4px;
 			text-align: center;
 			width: 7%;
 		}
-		input {
+		input[type="text"], input[type="number"] {
 			width: 100%;
 			box-sizing: border-box;
-			padding: 5px;
+			padding: 6px 4px;
 			text-align: center;
-			font-size: 14px;
+			font-size: 0.85rem;
+			border: none;
+			border-radius: 4px;
+			background-color: #111;
+			color: #fff;
+			/* Evitar zoom en inputs numéricos */
+			touch-action: manipulation;
+		}
+		input[disabled] {
+			background-color: #222;
+			color: #777;
 		}
 		button {
-			padding: 5px 10px;
-			font-size: 14px;
+			padding: 8px 14px;
+			font-size: 1rem;
 			cursor: pointer;
+			background-color: #0f0;
+			color: #000;
+			border: none;
+			border-radius: 6px;
+			user-select: none;
+			-webkit-tap-highlight-color: transparent;
+			transition: background-color 0.2s;
+		}
+		button:disabled {
+			background-color: #555;
+			color: #222;
+			cursor: default;
 		}
 		tr.separador td {
 			border: none !important;
@@ -48,7 +84,7 @@
 			background: #222;
 			color: #0f0;
 			font-weight: bold;
-			font-size: 16px;
+			font-size: 1rem;
 			text-align: left;
 			padding-left: 10px;
 			border: none !important;
@@ -59,9 +95,14 @@
 			background: #111;
 			padding: 20px;
 			border: 2px solid #0f0;
-			font-size: 18px;
+			font-size: 1.1rem;
 			text-align: center;
 			display: none;
+			border-radius: 8px;
+		}
+		/* Para evitar zoom por doble tap */
+		body, input, button {
+			touch-action: manipulation;
 		}
 	</style>
 </head>
@@ -165,7 +206,6 @@
 			btn.disabled = true;
 			btn.textContent = "Votado";
 
-			// Revisar diferencia
 			let diferencia = Math.abs(puntajeMC1 - puntajeMC2);
 
 			let tabla = document.getElementById('batallaTabla').getElementsByTagName('tbody')[0];
