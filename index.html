@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Batalla Formato con Réplica</title>
+	<style>
+		body {
+			background: #000;
+			color: #fff;
+			font-family: Arial, sans-serif;
+			padding: 20px;
+		}
+		h1 {
+			text-align: center;
+			margin-bottom: 20px;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			table-layout: fixed;
+		}
+		th, td {
+			border: 1px solid #555;
+			padding: 8px;
+			text-align: center;
+			width: 7%;
+		}
+		input {
+			width: 100%;
+			box-sizing: border-box;
+			padding: 5px;
+			text-align: center;
+			font-size: 14px;
+		}
+		button {
+			padding: 5px 10px;
+			font-size: 14px;
+			cursor: pointer;
+		}
+		tr.separador td {
+			border: none !important;
+			padding: 0 !important;
+			height: 30px;
+			background: transparent;
+		}
+		tr.ronda-marker td {
+			background: #222;
+			color: #0f0;
+			font-weight: bold;
+			font-size: 16px;
+			text-align: left;
+			padding-left: 10px;
+			border: none !important;
+			border-radius: 5px 5px 0 0;
+		}
+		#resultados {
+			margin-top: 30px;
+			background: #111;
+			padding: 20px;
+			border: 2px solid #0f0;
+			font-size: 18px;
+			text-align: center;
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<h1>BATALLA FORMATO</h1>
+
+	<table id="batallaTabla">
+
+		<tbody>
+			<tr class="ronda-marker">
+				<td colspan="12">Ronda 1</td>
+			</tr>
+			<tr class="header">
+				<th>MC</th>
+				<th>1</th>
+				<th>2</th>
+				<th>3</th>
+				<th>4</th>
+				<th>5</th>
+				<th>6</th>
+				<th>Flow</th>
+				<th>P.E</th>
+				<th>Skills</th>
+				<th>Res.</th>
+				<th>Votar</th>
+			</tr>
+			<tr class="bloque">
+				<td><input type="text" value="MC1" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" class="resultado" readonly /></td>
+				<td rowspan="2">
+					<button onclick="votar(this)">Votar</button>
+				</td>
+			</tr>
+			<tr class="bloque">
+				<td><input type="text" value="MC2" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" /></td>
+				<td><input type="number" value="0" class="resultado" readonly /></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div id="resultados"></div>
+
+	<script>
+		let nombreMC1 = '';
+		let nombreMC2 = '';
+		let rondaActual = 1;
+		let replicaActual = 0;
+		let puntajeMC1 = 0;
+		let puntajeMC2 = 0;
+
+		function votar(btn) {
+			const tbody = btn.closest('tbody');
+			const filas = tbody.querySelectorAll('tr.bloque');
+
+			if (!nombreMC1 && !nombreMC2) {
+				nombreMC1 = filas[0].querySelector('input[type="text"]').value;
+				nombreMC2 = filas[1].querySelector('input[type="text"]').value;
+			}
+
+			const lastBloqueIndex = filas.length - 2;
+
+			let sumaMC1 = 0;
+			let sumaMC2 = 0;
+
+			[0, 1].forEach(i => {
+				const fila = filas[lastBloqueIndex + i];
+				const nombre = fila.querySelector('input[type="text"]');
+				const numeros = fila.querySelectorAll('input[type="number"]:not(.resultado)');
+				let suma = 0;
+				numeros.forEach(input => {
+					suma += Number(input.value) || 0;
+					input.disabled = true;
+				});
+				nombre.disabled = true;
+				fila.querySelector('.resultado').value = suma;
+				if (i === 0) sumaMC1 = suma;
+				else sumaMC2 = suma;
+			});
+
+			puntajeMC1 += sumaMC1;
+			puntajeMC2 += sumaMC2;
+
+			btn.disabled = true;
+			btn.textContent = "Votado";
+
+			// Revisar diferencia
+			let diferencia = Math.abs(puntajeMC1 - puntajeMC2);
+
+			let tabla = document.getElementById('batallaTabla').getElementsByTagName('tbody')[0];
+
+			if (rondaActual >= 5) {
+				if (diferencia <= 3) {
+					if (replicaActual < 3) {
+						replicaActual++;
+						crearBloque(tabla, true);
+					} else {
+						mostrarResultado('EMPATE DEFINITIVO');
+					}
+				} else {
+					mostrarResultado();
+				}
+			} else {
+				rondaActual++;
+				crearBloque(tabla, false);
+			}
+		}
+
+		function crearBloque(tabla, esReplica) {
+			let filas = tabla.querySelectorAll('tr.bloque');
+			let invertir = filas.length % 4 === 0;
+			let mcArriba = invertir ? nombreMC2 : nombreMC1;
+			let mcAbajo = invertir ? nombreMC1 : nombreMC2;
+
+			let rondaTexto = esReplica ? `Réplica ${replicaActual}` : `Ronda ${rondaActual}`;
+
+			let separador = `
+				<tr class="separador"><td colspan="12"></td></tr>
+				<tr class="separador"><td colspan="12"></td></tr>
+			`;
+
+			let marcador = `<tr class="ronda-marker"><td colspan="12">${rondaTexto}</td></tr>`;
+
+			let encabezado = `
+				<tr class="header">
+					<th>MC</th>
+					<th>1</th>
+					<th>2</th>
+					<th>3</th>
+					<th>4</th>
+					<th>5</th>
+					<th>6</th>
+					<th>Flow</th>
+					<th>P.E</th>
+					<th>Skills</th>
+					<th>Res.</th>
+					<th>Votar</th>
+				</tr>
+			`;
+
+			let bloque = `
+				<tr class="bloque">
+					<td><input type="text" value="${mcArriba}" disabled /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" class="resultado" readonly /></td>
+					<td rowspan="2">
+						<button onclick="votar(this)">Votar</button>
+					</td>
+				</tr>
+				<tr class="bloque">
+					<td><input type="text" value="${mcAbajo}" disabled /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" /></td>
+					<td><input type="number" value="0" class="resultado" readonly /></td>
+				</tr>
+			`;
+
+			tabla.insertAdjacentHTML('beforeend', separador + marcador + encabezado + bloque);
+		}
+
+		function mostrarResultado(empate = '') {
+			let resultado = empate || `Resultados: ${nombreMC1}: ${puntajeMC1} - ${nombreMC2}: ${puntajeMC2} → GANADOR: ${(puntajeMC1 > puntajeMC2) ? nombreMC1 : nombreMC2}`;
+			let div = document.getElementById('resultados');
+			div.innerText = resultado;
+			div.style.display = 'block';
+		}
+	</script>
+</body>
+</html>
