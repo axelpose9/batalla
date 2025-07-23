@@ -259,6 +259,24 @@
 
 			puntajeMC1 = puntajesMC1;
 			puntajeMC2 = puntajesMC2;
+			// Crear objeto resultado
+			const resultadoBatalla = {
+				ronda: rondaActual,
+				mc1: nombreMC1,
+				mc2: nombreMC2,
+				puntajeMC1: puntajeMC1,
+				puntajeMC2: puntajeMC2,
+				fecha: new Date().toISOString()
+			};
+
+			// Leer resultados anteriores o crear array vacío
+			let resultadosGuardados = JSON.parse(localStorage.getItem('resultadosBatallas')) || [];
+
+			// Agregar nuevo resultado
+			resultadosGuardados.push(resultadoBatalla);
+
+			// Guardar en LocalStorage
+			localStorage.setItem('resultadosBatallas', JSON.stringify(resultadosGuardados));
 
 			const botones = tbody.querySelectorAll('button');
 			botones.forEach(b => {
