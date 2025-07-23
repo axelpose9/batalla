@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Historial de Batallas</title>
+	<style>
+		body {
+			background: #000;
+			color: #fff;
+			font-family: Arial, sans-serif;
+			padding: 20px;
+		}
+		h1 {
+			text-align: center;
+			margin-bottom: 20px;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 0.9rem;
+		}
+		th, td {
+			border: 1px solid #0f0;
+			padding: 8px;
+			text-align: center;
+		}
+		th {
+			background-color: #0f0;
+			color: #000;
+		}
+		tr:nth-child(even) {
+			background-color: #111;
+		}
+		#sinResultados {
+			text-align: center;
+			margin-top: 40px;
+			font-size: 1.1rem;
+			color: #f00;
+		}
+		button {
+			margin-top: 20px;
+			padding: 10px 16px;
+			font-size: 1rem;
+			background: #0f0;
+			color: #000;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<h1>Historial de Batallas</h1>
+
+	<table id="tablaResultados" style="display:none">
+		<thead>
+			<tr>
+				<th>Fecha</th>
+				<th>Ronda</th>
+				<th>MC 1</th>
+				<th>Puntaje MC 1</th>
+				<th>MC 2</th>
+				<th>Puntaje MC 2</th>
+				<th>Ganador</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- Aquí se cargan resultados -->
+		</tbody>
+	</table>
+
+	<div id="sinResultados">No hay resultados guardados.</div>
+
+	<button onclick="borrarHistorial()">Borrar Historial</button>
+
+	<script>
+		function cargarResultados() {
+			let resultados = JSON.parse(localStorage.getItem('resultadosBatallas')) || [];
+
+			const tabla = document.getElementById('tablaResultados');
+			const tbody = tabla.querySelector('tbody');
+			const sinResultados = document.getElementById('sinResultados');
+
+			if (resultados.length === 0) {
+				tabla.style.display = 'none';
+				sinResultados.style.display = 'block';
+				return;
+			}
+
+			// Mostrar tabla y ocultar mensaje
+			tabla.style.display = 'table';
+			sinResultados.style.display = 'none';
+
+			// Ordenar por fecha descendente (más recientes primero)
+			resultados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+			// Limpiar tabla antes de cargar
+			tbody.innerHTML = '';
+
+			resultados.forEach(r => {
+				const ganador = r.puntajeMC1 > r.puntajeMC2 ? r.mc1 : r.mc2;
+				const fechaFormateada = new Date(r.fecha).toLocaleString();
+
+				const tr = document.createElement('tr');
+				tr.innerHTML = `
+					<td>${fechaFormateada}</td>
+					<td>${r.ronda}</td>
+					<td>${r.mc1}</td>
+					<td>${r.puntajeMC1.toFixed(2)}</td>
+					<td>${r.mc2}</td>
+					<td>${r.puntajeMC2.toFixed(2)}</td>
+					<td>${ganador}</td>
+				`;
+				tbody.appendChild(tr);
+			});
+		}
+
+		function borrarHistorial() {
+			if (confirm('¿Seguro que querés borrar todo el historial de batallas?')) {
+				localStorage.removeItem('resultadosBatallas');
+				cargarResultados();
+			}
+		}
+
+		// Cargar al iniciar la página
+		window.onload = cargarResultados;
+	</script>
+</body>
+</html>
