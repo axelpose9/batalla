@@ -213,7 +213,6 @@
 			}
 
 			if (errorEncontrado) {
-				// No mostrar alerta, sólo bloquear el voto
 				return;
 			}
 
@@ -259,24 +258,6 @@
 
 			puntajeMC1 = puntajesMC1;
 			puntajeMC2 = puntajesMC2;
-			// Crear objeto resultado
-			const resultadoBatalla = {
-				ronda: rondaActual,
-				mc1: nombreMC1,
-				mc2: nombreMC2,
-				puntajeMC1: puntajeMC1,
-				puntajeMC2: puntajeMC2,
-				fecha: new Date().toISOString()
-			};
-
-			// Leer resultados anteriores o crear array vacío
-			let resultadosGuardados = JSON.parse(localStorage.getItem('resultadosBatallas')) || [];
-
-			// Agregar nuevo resultado
-			resultadosGuardados.push(resultadoBatalla);
-
-			// Guardar en LocalStorage
-			localStorage.setItem('resultadosBatallas', JSON.stringify(resultadosGuardados));
 
 			const botones = tbody.querySelectorAll('button');
 			botones.forEach(b => {
@@ -285,18 +266,37 @@
 			});
 
 			let diferencia = Math.abs(puntajeMC1 - puntajeMC2);
+			let resultadoFinal = '';
 
 			if (rondaActual >= 5) {
 				if (diferencia <= 3) {
+					resultadoFinal = 'RÉPLICA';
 					mostrarResultado('RÉPLICA');
 				} else {
+					resultadoFinal = puntajeMC1 > puntajeMC2 ? nombreMC1 : nombreMC2;
 					mostrarResultado();
 				}
+
+				// Guardar resultado SOLO una vez
+				const resultadoBatalla = {
+					ronda: rondaActual,
+					mc1: nombreMC1,
+					mc2: nombreMC2,
+					puntajeMC1: puntajeMC1,
+					puntajeMC2: puntajeMC2,
+					resultado: resultadoFinal,
+					fecha: new Date().toISOString()
+				};
+				let resultadosGuardados = JSON.parse(localStorage.getItem('resultadosBatallas')) || [];
+				resultadosGuardados.push(resultadoBatalla);
+				localStorage.setItem('resultadosBatallas', JSON.stringify(resultadosGuardados));
+
 			} else {
 				rondaActual++;
 				crearRonda();
 			}
 		}
+
 
 		function crearRonda() {
 			let tabla = document.getElementById('batallaTabla').getElementsByTagName('tbody')[0];
