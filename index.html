@@ -697,7 +697,7 @@
 			let texto = '';
 			const diferencia = Math.abs(puntajeMC1 - puntajeMC2);
 
-			if (diferencia < 3) {
+			if (diferencia <= 3) {
 				texto = `Resultados: ${nombreMC1}: ${puntajeMC1} - ${nombreMC2}: ${puntajeMC2} → RÉPLICA`;
 			} else {
 				let ganador = (puntajeMC1 > puntajeMC2) ? nombreMC1 : nombreMC2;
