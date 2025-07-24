@@ -5,9 +5,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<title>Batalla Formato con Réplica</title>
 	<style>
-		html, body {
+		html {
 			margin: 0;
 			padding: 0;
+			height: 100%;
 			background: #000;
 			color: #fff;
 			font-family: Arial, sans-serif;
@@ -15,11 +16,13 @@
 			-ms-user-select: none;
 			user-select: none;
 			-webkit-tap-highlight-color: transparent;
-			height: 100vh;
 			overflow-x: hidden;
 		}
+
 		body {
-			padding: 10px 5px;
+			margin: 0;
+			padding: 10px 5px 150px 5px; /* padding-bottom solo aquí */
+			min-height: 100vh;
 			-webkit-touch-callout: none;
 			background-image: url('votacion.png');
 			background-repeat: no-repeat;
@@ -27,6 +30,7 @@
 			background-position: center center;
 			color: #fff;
 		}
+
 		h1 {
 			text-align: center;
 			margin: 10px 0 20px 0;
@@ -111,191 +115,457 @@
 		body, input, button {
 			touch-action: manipulation;
 		}
+
+		/* Contenedor para input con flechas */
+		.contenedor-input {
+			position: relative;
+			width: 100%;
+			max-width: 120px;
+			margin: auto;
+		}
+
+		/* Input number estilo base */
+		input[type="number"] {
+			width: 100%;
+			box-sizing: border-box;
+			padding: 6px 30px 6px 6px; /* espacio a la derecha para flechas */
+			text-align: center;
+			font-size: 1rem;
+			border: none;
+			border-radius: 4px;
+			background-color: #111;
+			color: #fff;
+			outline: none;
+			-webkit-appearance: none;
+			-moz-appearance: textfield;
+			touch-action: manipulation;
+			transition: transform 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		/* Input number enfocado */
+		input[type="number"]:focus {
+			background: #000;
+			box-shadow: 0 0 10px #0f0;
+			transform: scale(1.2);
+			position: relative;
+			z-index: 10;
+		}
+
+		/* Contenedor de las flechas */
+		.flechas {
+			position: absolute;
+			right: 6px;
+			top: 50%;
+			transform: translateY(-50%);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			gap: 6px;
+			user-select: none;
+		}
+
+		/* Estilo base flechas */
+		.flecha {
+			width: 0;
+			height: 0;
+			border-left: 7px solid transparent;
+			border-right: 7px solid transparent;
+			cursor: pointer;
+		}
+
+		/* Flecha arriba */
+		.flecha.arriba {
+			border-bottom: 10px solid #0f0;
+		}
+
+		/* Flecha abajo */
+		.flecha.abajo {
+			border-top: 10px solid #0f0;
+		}
+		#tecladoPersonalizado.visible {
+			transform: translateY(0);
+		}
+		.tecla {
+			padding: 10px;
+			background: #0f0;
+			color: #000;
+			margin: 5px;
+			text-align: center;
+			border-radius: 5px;
+			cursor: pointer;
+			user-select: none;
+		}
+
+
 	</style>
 </head>
-<body>
-	<h1>BATALLA FORMATO</h1>
+	<body>
+		<h1>BATALLA FORMATO</h1>
 
-	<table id="batallaTabla">
-		<tbody>
-			<tr class="ronda-marker">
-				<td colspan="12">Ronda 1</td>
-			</tr>
-			<tr class="header">
-				<th>MC</th>
-				<th>1</th>
-				<th>2</th>
-				<th>3</th>
-				<th>4</th>
-				<th>5</th>
-				<th>6</th>
-				<th>Flow</th>
-				<th>P.E</th>
-				<th>Skills</th>
-				<th>Res.</th>
-				<th>Votar</th>
-			</tr>
-			<tr class="bloque">
-				<td><input type="text" value="MC1" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" value="0" class="resultado" readonly /></td>
-				<td rowspan="2">
-					<button onclick="votar(this)">Votar</button>
-				</td>
-			</tr>
-			<tr class="bloque">
-				<td><input type="text" value="MC2" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" min="0" max="5" value="0" /></td>
-				<td><input type="number" value="0" class="resultado" readonly /></td>
-			</tr>
-		</tbody>
-	</table>
+		<!-- Ventana flotante para ingresar nombres -->
+		<div id="nombreModal" style="
+			position: fixed;
+			top: 0; left: 0;
+			width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			z-index: 9999;
+		">
+			<div style="
+				background: #111;
+				padding: 20px;
+				border: 2px solid #0f0;
+				border-radius: 8px;
+				text-align: center;
+			">
+				<h2>Ingresa los nombres de los MC</h2>
+				<input type="text" id="mc1Input" placeholder="MC 1" style="margin: 10px; padding: 8px; width: 200px;">
+				<input type="text" id="mc2Input" placeholder="MC 2" style="margin: 10px; padding: 8px; width: 200px;">
+				<br>
+				<button onclick="guardarNombres()">Guardar</button>
+				<button onclick="cancelarIngreso()">Cancelar</button>
+			</div>
+		</div>
+
+		<!-- Teclado Personalizado -->
+	<div id="tecladoPersonalizado" style="
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		max-width: 480px;
+		background: #111;
+		border-top: 3px solid #0f0;
+		padding: 10px 15px;
+		box-sizing: border-box;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		user-select: none;
+		z-index: 10000;
+		display: none; /* SIEMPRE solo display: none al inicio */
+	">
+		<button onclick="insertarNumero(0)">0</button>
+		<button onclick="insertarNumero(0.5)">0.5</button>
+		<button onclick="insertarNumero(1)">1</button>
+		<button onclick="insertarNumero(1.5)">1.5</button>
+		<button onclick="insertarNumero(2)">2</button>
+		<button onclick="insertarNumero(2.5)">2.5</button>
+		<button onclick="insertarNumero(3)">3</button>
+		<button onclick="insertarNumero(3.5)">3.5</button>
+		<button onclick="insertarNumero(4)">4</button>
+		<button onclick="insertarNumero(4.5)">4.5</button>
+		<button onclick="insertarNumero(5)">5</button>
+		<button onclick="limpiarInput()">C</button>
+	</div>
+
+
+		</div>
+
+		<table id="batallaTabla">
+			<tbody>
+				<tr class="ronda-marker">
+					<td colspan="11">Ronda 1</td>
+				</tr>
+				<tr class="header">
+					<th>MC</th>
+					<th>1</th>
+					<th>2</th>
+					<th>3</th>
+					<th>4</th>
+					<th>5</th>
+					<th>6</th>
+					<th>Flow</th>
+					<th>P.E</th>
+					<th>Skills</th>
+					<th>Res.</th>
+				</tr>
+				<tr class="bloque">
+					<td><input type="text" value="${nombreMC1}" disabled /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+					<td><input type="text" value="0" class="resultado" readonly /></td>
+				</tr>
+					<tr class="bloque">
+						<td><input type="text" value="MC2" disabled /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" inputmode="decimal" pattern="[0-5](\.[05])?" maxlength="3" /></td>
+						<td><input type="text" value="0" class="resultado" readonly /></td>
+					</tr>
+				<tr>
+					<td colspan="11" style="text-align:center;">
+						<button class="btn-votar" onclick="votar(this)">Votar</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+
 
 	<div id="resultados"></div>
-
+	<!-- Nuevos botones que aparecerán al final de la votación, inicialmente ocultos -->
+	<div id="acciones" style="text-align: center; margin: 20px 0;">
+		<!-- Botones que siempre están visibles -->
+		<button onclick="enviarMensaje('reiniciar')" style="background-color: #f80;">🔄 Reiniciar</button>
+		<button onclick="enviarMensaje('salir')" style="background-color: #f00; color: #fff; margin-left: 10px;">⛔ Salir</button>
+	</div>
 	<script>
+		function enviarMensaje(mensaje) {
+			if (window.AppInventor) {
+				window.AppInventor.setWebViewString(mensaje);
+			} else {
+				console.log("Mensaje para Kodular:", mensaje);
+			}
+		}
+
+		function cancelarIngreso() {
+			enviarMensaje('CANCELAR');
+		}
+
+		const teclado = document.getElementById('tecladoPersonalizado');
+		let inputActivo = null;
+
+		function esInputVotacion(input) {
+			return (
+				input &&
+				input.tagName === 'INPUT' &&
+				input.type === 'text' &&
+				!input.disabled &&
+				input.closest('#batallaTabla') &&
+				!input.classList.contains('resultado') &&
+				!input.closest('#nombreModal')
+			);
+		}
+
+		const tbodyBatalla = document.querySelector('#batallaTabla tbody');
+
+		tbodyBatalla.addEventListener('focusin', (e) => {
+			const input = e.target;
+			if (esInputVotacion(input)) {
+				inputActivo = input;
+				teclado.style.display = 'grid';
+				console.log('✅ Teclado activo en:', inputActivo);
+			}
+		});
+
+		tbodyBatalla.addEventListener('focusout', (e) => {
+			setTimeout(() => {
+				const nuevoFoco = document.activeElement;
+				if (esInputVotacion(nuevoFoco) || teclado.contains(nuevoFoco)) {
+					console.log('🔄 Teclado mantiene foco en:', nuevoFoco);
+				} else {
+					inputActivo = null;
+					teclado.style.display = 'none';
+					console.log('🚫 Teclado ocultado por pérdida de foco');
+				}
+			}, 50);
+		});
+
+		document.querySelectorAll('#tecladoPersonalizado button').forEach(btn => {
+			btn.addEventListener('mousedown', e => e.preventDefault());
+		});
+
+		function insertarNumero(valorPermitido) {
+			if (!inputActivo) {
+				const focused = document.activeElement;
+				if (focused && focused.tagName === 'INPUT' && !focused.disabled) {
+					inputActivo = focused;
+				} else {
+					console.log('No hay input activo ni foco en input');
+					return;
+				}
+			}
+
+			inputActivo.focus();
+
+			let max = inputActivo.max ? Number(inputActivo.max) : 5;
+			let num = Number(valorPermitido);
+
+			if (isNaN(num) || num < 0 || num > max) {
+				console.log('Valor no permitido');
+				return;
+			}
+
+			inputActivo.value = num;
+		}
+
+		function borrarNumero() {
+			if (!inputActivo) return;
+			inputActivo.value = '';
+			inputActivo.focus();
+		}
+
+		function limpiarInput() {
+			if (!inputActivo) return;
+			inputActivo.value = '';
+			inputActivo.focus();
+		}
+
+		document.body.addEventListener('click', e => {
+			if (!e.target.matches('input[type="text"]') && !e.target.closest('#tecladoPersonalizado')) {
+				inputActivo = null;
+			}
+		});
+
 		let nombreMC1 = '';
 		let nombreMC2 = '';
 		let rondaActual = 1;
 		let puntajeMC1 = 0;
 		let puntajeMC2 = 0;
+		
+		function calcularPuntajeMC1() {
+			let tabla = document.querySelector('#batallaTabla tbody');
+			let bloques = tabla.querySelectorAll('tr.bloque');
+			let suma = 0;
 
-		function validarInputs(inputs) {
-			let esValido = true;
-			inputs.forEach(input => {
-				input.classList.remove('error');
-				let val = input.value.trim();
-				// Validar que sea un número válido (entero o decimal)
-				if (!/^(\d+(\.\d+)?|\.\d+)$/.test(val)) {
-					esValido = false;
-					input.classList.add('error');
-				} else {
-					let num = Number(val);
-					if (num < 0 || num > 4) {
-						esValido = false;
-						input.classList.add('error');
+			for (let i = 0; i < bloques.length; i += 2) {
+				let inputs = bloques[i].querySelectorAll('input');
+				inputs.forEach(input => {
+					if (input.getAttribute('inputmode') === 'decimal') {
+						let num = Number(input.value.trim()) || 0;
+						suma += num;
 					}
-				}
-			});
-			return esValido;
+				});
+			}
+			return suma;
 		}
+
+		function calcularPuntajeMC2() {
+			let tabla = document.querySelector('#batallaTabla tbody');
+			let bloques = tabla.querySelectorAll('tr.bloque');
+			let suma = 0;
+
+			for (let i = 1; i < bloques.length; i += 2) {
+				let inputs = bloques[i].querySelectorAll('input');
+				inputs.forEach(input => {
+					if (input.getAttribute('inputmode') === 'decimal') {
+						let num = Number(input.value.trim()) || 0;
+						suma += num;
+					}
+				});
+			}
+			return suma;
+		}
+
 
 
 		function votar(btn) {
-			const tbody = document.querySelector('#batallaTabla tbody');
-			const filas = tbody.querySelectorAll('tr.bloque');
+			let filaBotones = btn.closest('tr');
+			let bloqueMC2 = filaBotones.previousElementSibling;
+			let bloqueMC1 = bloqueMC2.previousElementSibling;
 
-			if (!nombreMC1 && !nombreMC2) {
-				nombreMC1 = filas[0].querySelector('input[type="text"]').value;
-				nombreMC2 = filas[1].querySelector('input[type="text"]').value;
-			}
-
+			// Validar inputs solo de este bloque
 			let errorEncontrado = false;
-			for (let i = 0; i < filas.length; i++) {
-				let inputsNum = filas[i].querySelectorAll('input[type="number"]:not(.resultado)');
-				if (!validarInputs(inputsNum)) errorEncontrado = true;
-			}
-
-			if (errorEncontrado) {
-				return;
-			}
-
-			let puntajesMC1 = 0;
-			let puntajesMC2 = 0;
-
-			for (let i = 0; i < filas.length; i += 2) {
-				const fila1 = filas[i];
-				const fila2 = filas[i + 1];
-
-				if (fila1 && fila2) {
-					const nombreFila1 = fila1.querySelector('input[type="text"]').value;
-					const inputs1 = fila1.querySelectorAll('input[type="number"]:not(.resultado)');
-					let suma1 = 0;
-					inputs1.forEach(input => {
-						let val = Number(input.value);
-						suma1 += val;
-						input.disabled = true;
-					});
-					fila1.querySelector('input[type="text"]').disabled = true;
-					fila1.querySelector('.resultado').value = suma1;
-
-					const nombreFila2 = fila2.querySelector('input[type="text"]').value;
-					const inputs2 = fila2.querySelectorAll('input[type="number"]:not(.resultado)');
-					let suma2 = 0;
-					inputs2.forEach(input => {
-						let val = Number(input.value);
-						suma2 += val;
-						input.disabled = true;
-					});
-					fila2.querySelector('input[type="text"]').disabled = true;
-					fila2.querySelector('.resultado').value = suma2;
-
-					if (nombreFila1 === nombreMC1) {
-						puntajesMC1 += suma1;
-						puntajesMC2 += suma2;
+			[bloqueMC1, bloqueMC2].forEach(bloque => {
+				let inputs = bloque.querySelectorAll('input:not([disabled]):not(.resultado)');
+				inputs.forEach(input => {
+					input.classList.remove('error');
+					let val = input.value.trim();
+					if (val !== '' && !/^(\d+(\.\d+)?|\.\d+)$/.test(val)) {
+						errorEncontrado = true;
+						input.classList.add('error');
 					} else {
-						puntajesMC1 += suma2;
-						puntajesMC2 += suma1;
+						let num = val === '' ? 0 : Number(val);
+						if (num < 0 || num > 5) {
+							errorEncontrado = true;
+							input.classList.add('error');
+						}
 					}
-				}
-			}
-
-			puntajeMC1 = puntajesMC1;
-			puntajeMC2 = puntajesMC2;
-
-			const botones = tbody.querySelectorAll('button');
-			botones.forEach(b => {
-				b.disabled = true;
-				b.textContent = "Votado";
+				});
 			});
 
-			let diferencia = Math.abs(puntajeMC1 - puntajeMC2);
-			let resultadoFinal = '';
+			if (errorEncontrado) return;
 
-			if (rondaActual >= 5) {
-				if (diferencia <= 3) {
-					resultadoFinal = 'RÉPLICA';
-					mostrarResultado('RÉPLICA');
-				} else {
-					resultadoFinal = puntajeMC1 > puntajeMC2 ? nombreMC1 : nombreMC2;
-					mostrarResultado();
-				}
+			// Sumar y bloquear inputs solo de este bloque
+			[bloqueMC1, bloqueMC2].forEach(bloque => {
+				let suma = 0;
+				let inputs = bloque.querySelectorAll('input:not(.resultado)');
+				inputs.forEach(input => {
+					let num = Number(input.value.trim()) || 0;
+					suma += num;
+					input.disabled = true;
+					if (input.value.trim() === '') input.value = '0';
+				});
+				bloque.querySelector('.resultado').value = suma;
+			});
 
-				// Guardar resultado SOLO una vez
-				const resultadoBatalla = {
-					ronda: rondaActual,
-					mc1: nombreMC1,
-					mc2: nombreMC2,
-					puntajeMC1: puntajeMC1,
-					puntajeMC2: puntajeMC2,
-					resultado: resultadoFinal,
-					fecha: new Date().toISOString()
-				};
-				let resultadosGuardados = JSON.parse(localStorage.getItem('resultadosBatallas')) || [];
-				resultadosGuardados.push(resultadoBatalla);
-				localStorage.setItem('resultadosBatallas', JSON.stringify(resultadosGuardados));
+			// Cambiar botón Votar/Actualizar según contexto
+			if (btn.textContent === 'Actualizar') {
+				btn.textContent = 'Votado';
+				btn.style.backgroundColor = '#555';
+				btn.style.color = '#222';
+				btn.disabled = true;
 
-			} else {
+				let btnEditar = filaBotones.querySelector('.btn-editar');
+				if (btnEditar) btnEditar.disabled = false;
+
+			} else if (btn.textContent === 'Votar') {
+				btn.textContent = 'Votado';
+				btn.style.backgroundColor = '#555';
+				btn.style.color = '#222';
+				btn.disabled = true;
+
+				let btnEditar = filaBotones.querySelector('.btn-editar');
+			
+
 				rondaActual++;
-				crearRonda();
+				actualizarBotonVolver();
+				if (rondaActual > 5) {
+					mostrarResultado();
+					finalizarVotacion();
+				} else {
+					crearRonda();
+				}
 			}
 		}
+
+		function editarRonda(btnEditar) {
+			let filaBotones = btnEditar.closest('tr');
+			let bloqueMC2 = filaBotones.previousElementSibling;
+			let bloqueMC1 = bloqueMC2.previousElementSibling;
+
+			if (btnEditar.textContent === 'Editar') {
+				// Activar edición de ambos bloques
+				[bloqueMC1, bloqueMC2].forEach(bloque => {
+					bloque.querySelectorAll('input[inputmode="decimal"]').forEach(input => input.disabled = false);
+				});
+				btnEditar.textContent = 'Actualizar';
+				btnEditar.style.backgroundColor = '#0f0';
+			} else {
+				// Al actualizar, bloquear de nuevo
+				[bloqueMC1, bloqueMC2].forEach(bloque => {
+					let suma = 0;
+					bloque.querySelectorAll('input[inputmode="decimal"]').forEach(input => {
+						if (input.value.trim() === '') input.value = '0';
+						let num = Number(input.value.trim()) || 0;
+						suma += num;
+						input.disabled = true;
+					});
+					bloque.querySelector('.resultado').value = suma;
+				});
+				btnEditar.textContent = 'Editar';
+				btnEditar.style.backgroundColor = '';
+			}
+		}
+
+
+
 
 
 		function crearRonda() {
@@ -303,11 +573,11 @@
 			let rondaTexto = `Ronda ${rondaActual}`;
 
 			let separador = `
-				<tr class="separador"><td colspan="12"></td></tr>
-				<tr class="separador"><td colspan="12"></td></tr>
+				<tr class="separador"><td colspan="11"></td></tr>
+				<tr class="separador"><td colspan="11"></td></tr>
 			`;
 
-			let marcador = `<tr class="ronda-marker"><td colspan="12">${rondaTexto}</td></tr>`;
+			let marcador = `<tr class="ronda-marker" id="ronda-${rondaActual}"><td colspan="11">${rondaTexto}</td></tr>`;
 
 			let encabezado = `
 				<tr class="header">
@@ -322,91 +592,271 @@
 					<th>P.E</th>
 					<th>Skills</th>
 					<th>Res.</th>
-					<th>Votar</th>
 				</tr>
 			`;
 
-			let bloque = '';
-			if (rondaActual % 2 === 1) {
-				bloque = `
-					<tr class="bloque">
-						<td><input type="text" value="${nombreMC1}" disabled /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" value="0" class="resultado" readonly /></td>
-						<td rowspan="2">
-							<button onclick="votar(this)">Votar</button>
-						</td>
-					</tr>
-					<tr class="bloque">
-						<td><input type="text" value="${nombreMC2}" disabled /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" value="0" class="resultado" readonly /></td>
-					</tr>
-				`;
-			} else {
-				bloque = `
-					<tr class="bloque">
-						<td><input type="text" value="${nombreMC2}" disabled /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" value="0" class="resultado" readonly /></td>
-						<td rowspan="2">
-							<button onclick="votar(this)">Votar</button>
-						</td>
-					</tr>
-					<tr class="bloque">
-						<td><input type="text" value="${nombreMC1}" disabled /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" min="0" max="5" value="0" /></td>
-						<td><input type="number" value="0" class="resultado" readonly /></td>
-					</tr>
-				`;
-			}
+			let bloque = `
+				<tr class="bloque">
+					<td><input type="text" value="${nombreMC1}" disabled /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" value="0" class="resultado" readonly /></td>
+				</tr>
+				<tr class="bloque">
+					<td><input type="text" value="${nombreMC2}" disabled /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" inputmode="decimal" maxlength="3" /></td>
+					<td><input type="text" value="0" class="resultado" readonly /></td>
+				</tr>
+			`;
 
-			tabla.insertAdjacentHTML('beforeend', separador + marcador + encabezado + bloque);
+			let filaBotones = `
+				<tr>
+					<td colspan="11" style="text-align:center;">
+						<button class="btn-votar" onclick="votar(this)">Votar</button>
+					</td>
+				</tr>
+			`;
+
+			tabla.insertAdjacentHTML('beforeend', separador + marcador + encabezado + bloque + filaBotones);
+
+			// 🔽 Revisar rondas anteriores y ponerles SOLO Editar
+			document.querySelectorAll('.btn-votar').forEach((btn, idx, arr) => {
+				// Si NO es el último votar => reemplazar por Editar
+				if (idx < arr.length - 1) {
+					let filaBotones = btn.closest('tr');
+					btn.remove();
+					filaBotones.innerHTML = `
+						<td colspan="11" style="text-align:center;">
+							<button class="btn-editar" onclick="editarRonda(this)">Editar</button>
+						</td>
+					`;
+				}
+			});
+		}
+
+
+
+
+
+
+
+		function ocultarVolverMenosUltimo() {
+			let botonesVolver = document.querySelectorAll('.btn-volver');
+			if (rondaActual > 5) {
+				botonesVolver.forEach(btn => btn.style.display = 'none');
+				return;
+			}
+			if (rondaActual > 1) {
+				botonesVolver.forEach(btn => btn.style.display = 'none');
+				if (botonesVolver.length > 0) {
+					botonesVolver[botonesVolver.length - 1].style.display = 'inline-block';
+				}
+			} else {
+				botonesVolver.forEach(btn => btn.style.display = 'none');
+			}
 		}
 
 		function mostrarResultado(mensaje = '') {
+			puntajeMC1 = calcularPuntajeMC1();
+			puntajeMC2 = calcularPuntajeMC2();
+
+			console.log(`MC1: ${puntajeMC1}, MC2: ${puntajeMC2}`); // Verifica
+
 			let texto = '';
 			if (mensaje === 'RÉPLICA') {
 				texto = `Resultados: ${nombreMC1}: ${puntajeMC1} - ${nombreMC2}: ${puntajeMC2} → ${mensaje}`;
 			} else {
-				texto = mensaje || `Resultados: ${nombreMC1}: ${puntajeMC1} - ${nombreMC2}: ${puntajeMC2} → GANADOR: ${(puntajeMC1 > puntajeMC2) ? nombreMC1 : nombreMC2}`;
+				let ganador = (puntajeMC1 > puntajeMC2) ? nombreMC1 : (puntajeMC2 > puntajeMC1) ? nombreMC2 : 'EMPATE';
+				texto = `Resultados: ${nombreMC1}: ${puntajeMC1} - ${nombreMC2}: ${puntajeMC2} → GANADOR: ${ganador}`;
 			}
+
 			let div = document.getElementById('resultados');
 			div.innerText = texto;
 			div.style.display = 'block';
 		}
+
+
+
+		function actualizarBotonVolver() {
+			let botonesVolver = document.querySelectorAll('button[onclick="volverRonda()"]');
+			if (rondaActual <= 1 || rondaActual > 5) {
+				botonesVolver.forEach(btn => btn.style.display = 'none');
+			} else {
+				botonesVolver.forEach(btn => btn.style.display = 'none');
+				if (botonesVolver.length > 0) {
+					botonesVolver[botonesVolver.length - 1].style.display = 'inline-block';
+				}
+			}
+		}
+
+		function guardarResultado() {
+			let resultados = JSON.parse(localStorage.getItem('resultadosBatallas')) || [];
+
+			// 🟢 Asegúrate de recalcular ANTES de guardar
+			let puntaje1 = calcularPuntajeMC1();
+			let puntaje2 = calcularPuntajeMC2();
+
+			let resultado = {
+				fecha: new Date().toISOString(),
+				mc1: nombreMC1,
+				puntajeMC1: puntaje1,
+				mc2: nombreMC2,
+				puntajeMC2: puntaje2
+			};
+
+			resultados.push(resultado);
+			localStorage.setItem('resultadosBatallas', JSON.stringify(resultados));
+
+			console.log('Guardado:', resultado);
+		}
+
+
+		function guardarNombres() {
+			let mc1 = document.getElementById('mc1Input');
+			let mc2 = document.getElementById('mc2Input');
+
+			mc1.classList.remove('error');
+			mc2.classList.remove('error');
+
+			let nombre1 = mc1.value.trim();
+			let nombre2 = mc2.value.trim();
+
+			let hayError = false;
+
+			if (nombre1 === '') {
+				mc1.classList.add('error');
+				hayError = true;
+			}
+			if (nombre2 === '') {
+				mc2.classList.add('error');
+				hayError = true;
+			}
+
+			if (hayError) return;
+
+			nombreMC1 = nombre1;
+			nombreMC2 = nombre2;
+
+			const filas = document.querySelectorAll('tr.bloque');
+			if (filas[0]) {
+				const input1 = filas[0].querySelector('input[type="text"]');
+				if (input1) input1.value = nombreMC1;
+			}
+			if (filas[1]) {
+				const input2 = filas[1].querySelector('input[type="text"]');
+				if (input2) input2.value = nombreMC2;
+			}
+
+			document.getElementById('nombreModal').style.display = 'none';
+		}
+
+		function volverRonda() {
+			if (rondaActual <= 1 || rondaActual > 5) return;
+
+			let tabla = document.getElementById('batallaTabla').getElementsByTagName('tbody')[0];
+			let filas = Array.from(tabla.querySelectorAll('tr'));
+			let filasAEliminar = 7;
+
+			for (let i = 0; i < filasAEliminar; i++) {
+				if (filas.length === 0) break;
+				let fila = filas.pop();
+				fila.remove();
+			}
+
+			rondaActual--;
+			actualizarBotonVolver();
+
+			let bloques = tabla.querySelectorAll('tr.bloque');
+			if (bloques.length >= 2) {
+				let bloque1 = bloques[bloques.length - 2];
+				let bloque2 = bloques[bloques.length - 1];
+
+				[bloque1, bloque2].forEach(bloque => {
+					bloque.querySelectorAll('input').forEach(input => {
+						if (
+							input.getAttribute('inputmode') === 'decimal' &&
+							!input.classList.contains('resultado')
+						) {
+							input.disabled = false;
+						}
+					});
+				});
+			}
+
+			let botonesVotar = tabla.querySelectorAll('button[onclick="votar(this)"]');
+			botonesVotar.forEach(btn => {
+				if (btn.dataset.votado === 'true') {
+					btn.disabled = true;
+					btn.textContent = "Votado";
+					btn.style.backgroundColor = "#555";
+					btn.style.color = "#222";
+				} else {
+					btn.disabled = false;
+					btn.textContent = "Votar";
+					btn.style.backgroundColor = "#0f0";
+					btn.style.color = "#000";
+				}
+			});
+
+			let botonesVolver = tabla.querySelectorAll('button[onclick="volverRonda()"]');
+			botonesVolver.forEach(btn => (btn.style.display = "none"));
+
+			let filasTabla = tabla.querySelectorAll('tr');
+			for (let i = filasTabla.length - 1; i >= 0; i--) {
+				let fila = filasTabla[i];
+				let btnVotar = fila.querySelector('button[onclick="votar(this)"]');
+				let btnVolver = fila.querySelector('button[onclick="volverRonda()"]');
+				if (btnVotar) {
+					if (i >= filasTabla.length - 2) {
+						btnVotar.disabled = false;
+						btnVotar.textContent = "Votar";
+						btnVotar.style.backgroundColor = "#0f0";
+						btnVotar.style.color = "#000";
+						if (rondaActual > 1 && btnVolver) btnVolver.style.display = "inline-block";
+					} else {
+						btnVotar.disabled = true;
+						btnVotar.textContent = "Votado";
+						btnVotar.style.backgroundColor = "#555";
+						btnVotar.style.color = "#222";
+						if (btnVolver) btnVolver.style.display = "none";
+					}
+				}
+			}
+		}
+		function finalizarVotacion() {
+			guardarResultado();
+			let tabla = document.getElementById('batallaTabla').getElementsByTagName('tbody')[0];
+			tabla.querySelectorAll('input').forEach(input => {
+				input.disabled = true;
+			});
+			tabla.querySelectorAll('button[onclick="votar(this)"]').forEach(btn => {
+				btn.disabled = true;
+				btn.textContent = "Votado";
+				btn.style.backgroundColor = "#555";
+				btn.style.color = "#222";
+			});
+			tabla.querySelectorAll('button[onclick="volverRonda()"]').forEach(btn => {
+				btn.style.display = "none";
+			});
+			document.getElementById('acciones').style.display = 'block';
+		}
 	</script>
+
+
 </body>
 </html>
