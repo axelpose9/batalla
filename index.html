@@ -509,15 +509,6 @@
 		}
 
 
-
-
-
-
-
-
-
-
-
 		let puntajeMC1 = 0;
 		let puntajeMC2 = 0;
 
@@ -740,6 +731,36 @@
 			return suma;
 		}
 
+		function finalizarTodo() {
+			console.log("Finalizando todo...");
+
+			document.querySelectorAll('.editable').forEach(div => {
+				// Crear un clon sin edición
+				const span = document.createElement('span');
+				span.innerText = div.innerText;
+				span.style.display = 'inline-block';
+				span.style.minWidth = div.offsetWidth + 'px'; // Mantener ancho visual
+				span.style.padding = '4px';
+				span.style.border = 'none';
+				span.style.cursor = 'default';
+				
+				// Reemplazar el div editable por un span limpio
+				div.replaceWith(span);
+			});
+
+			// Ocultar teclado falso si hay
+			const tecladoFalso = document.getElementById('tecladoFalso');
+			if (tecladoFalso) {
+				tecladoFalso.style.display = 'none';
+			}
+
+			// Opcional: deshabilitar botones u otras acciones
+			// document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+		}
+
+
+		// Llamar a esta función después de mostrar los resultados
 		function mostrarResultado() {
 			puntajeMC1 = calcularPuntajeMC1();
 			puntajeMC2 = calcularPuntajeMC2();
@@ -761,27 +782,15 @@
 			div.style.display = 'block';
 			guardarResultado(nombreMC1, puntajeMC1, nombreMC2, puntajeMC2);
 
+			// Llamar a la función para finalizar y bloquear edición
+			finalizarTodo();
 		}
 
 
-		// Función para reiniciar la votación
-		function finalizarVotacion() {
-			
-			let tabla = document.getElementById('batallaTabla').getElementsByTagName('tbody')[0];
-			tabla.querySelectorAll('input').forEach(input => {
-				input.disabled = true;
-			});
-			tabla.querySelectorAll('button[onclick="votar(this)"]').forEach(btn => {
-				btn.disabled = true;
-				btn.textContent = "Votado";
-				btn.style.backgroundColor = "#555";
-				btn.style.color = "#222";
-			});
-			tabla.querySelectorAll('button[onclick="volverRonda()"]').forEach(btn => {
-				btn.style.display = "none";
-			});
-			document.getElementById('acciones').style.display = 'block';
-		}
+
+
+
+
 		// Función para enviar el mensaje (por si es necesario para tu integración)
 		function enviarMensaje(mensaje) {
 			if (window.AppInventor) {
