@@ -423,6 +423,7 @@
 			// Verificar si el clic fue fuera del div editable o del teclado
 			if (divActivo && !divActivo.contains(event.target) && !tecladoFalso.contains(event.target)) {
 				// Desactivar el modo de edición
+				recalcularResultados();
 				divActivo.contentEditable = false;
 				divActivo.style.border = 'none';
 				tecladoFalso.style.display = 'none';  // Ocultar el teclado
@@ -441,6 +442,7 @@
 			if (divActivo) {
 				divActivo.contentEditable = false;
 				divActivo.style.border = 'none';
+				
 			}
 
 			// Activar el nuevo div
@@ -523,6 +525,7 @@
 
 		// Función votar
 		function votar(btn) {
+			
 			let filaBotones = btn.closest('tr');
 			let bloqueMC1 = filaBotones.previousElementSibling;
 			let bloqueMC2 = bloqueMC1.previousElementSibling;
@@ -562,6 +565,8 @@
 			
 		}
 
+
+	
 		// Función para editar ronda
 		function editarRonda(btnEditar) {
 			let filaBotones = btnEditar.closest('tr');
@@ -571,7 +576,7 @@
 			if (btnEditar.textContent === 'Editar') {
 				// Activar edición de ambos bloques
 				[bloqueMC1, bloqueMC2].forEach(bloque => {
-					bloque.querySelectorAll('input[inputmode="decimal"]').forEach(input => input.disabled = false);
+					bloque.querySelectorAll('input, .editable').forEach(input => input.disabled = false);
 				});
 				btnEditar.textContent = 'Actualizar';
 				btnEditar.style.backgroundColor = '#0f0';
@@ -579,18 +584,65 @@
 				// Al actualizar, bloquear de nuevo
 				[bloqueMC1, bloqueMC2].forEach(bloque => {
 					let suma = 0;
-					bloque.querySelectorAll('input[inputmode="decimal"]').forEach(input => {
-						if (input.value.trim() === '') input.value = '0';
-						let num = Number(input.value.trim()) || 0;
+					bloque.querySelectorAll('.editable').forEach(div => {
+						let valor = div.innerText.trim();
+						if (valor === '') valor = '0'; // Asegúrate de que no esté vacío
+						let num = Number(valor) || 0;
 						suma += num;
-						input.disabled = true;
+						div.contentEditable = false; // Bloquear edición
 					});
-					bloque.querySelector('.resultado').value = suma;
+
+					// Actualizar el resultado de la ronda
+					bloque.querySelector('.resultado').innerText = suma;
 				});
+
 				btnEditar.textContent = 'Editar';
 				btnEditar.style.backgroundColor = '';
+
+				// Recalcular los resultados de la ronda después de editar
+				
 			}
 		}
+
+
+
+		// Función para recalcular los resultados de todas las rondas
+		function recalcularResultados() {
+			console.log("Recalculando resultados...");
+
+			// Recalcular los puntajes para cada bloque y actualizar sus resultados
+			document.querySelectorAll('.bloque').forEach((bloque, index) => {
+				let suma = 0;
+
+				// Seleccionar todos los divs editables dentro de cada bloque
+				bloque.querySelectorAll('.editable').forEach(div => {
+					let valor = Number(div.innerText.trim()) || 0;
+					suma += valor;
+				});
+
+				// Obtener el div de resultado dentro del bloque actual
+				let resultadoDiv = bloque.querySelector('.resultado');
+				if (resultadoDiv) {
+					// Actualizar el resultado del bloque
+					resultadoDiv.innerText = suma;
+					console.log(`Bloque ${index + 1} - Resultado actualizado: ${suma}`);
+				}
+			});
+		}
+
+
+
+		// Agregar un listener a cada div editable para recalcular cuando se edite
+		document.querySelectorAll('.editable').forEach(div => {
+			div.addEventListener('blur', function() {
+				console.log("Campo editado, recalculando...");
+				recalcularResultados();  // Recalcular resultados cuando se pierda el foco
+			});
+		});
+
+		// Función para inicializar y recalcular puntajes desde el principio
+
+
 
 		let rondaActual = 2; // Ya se cargó Ronda 1 por HTML
 		const maxRondas = 5;
